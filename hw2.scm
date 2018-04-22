@@ -95,24 +95,30 @@
 (define (swap-all elements swaps)
     ; Base Case: If we've gone through the entire list of swaps, return empty list
     (cond ((null? swaps) '())
+        ; Swap the elements, then recurse with the tail of the swaps
         (#t (cons (swap-elements (nth-item 1 (car swaps)) (nth-item 2 (car swaps)) elements) (swap-all elements (cdr swaps))))
     )
 )
 
 
 ; This function formats the output of the swapped elements
-; (define (format-swapped elements swaps)
-
-; )
+(define (format-swapped elements swaps)
+    ; Base Case: If we've gone through the entire list of swaps, return empty list
+    (cond ((null? swaps) '())
+        ; Pair the element with the swap that was made, then recursively continue
+        (#t (cons (cons (car elements) (list (car swaps))) (format-swapped (cdr elements) (cdr swaps))))
+    )
+)
 
 
 ; This function will return all children of the current state by returning all
 ; possible swaps that can be made.
 (define (get-children frontier)  ; TODO: Is this actually called the frontier?
-    (swap-all (nth-item 1 frontier) (all-swaps 1 (length (nth-item 1 frontier))))
+    (let ((swaps (all-swaps 1 (length (nth-item 1 frontier)))))
+        (format-swapped (swap-all (nth-item 1 frontier) swaps) swaps)
+    )
 
-    ; Iterate through all-swaps and actually swap those elements
-    ; Append new swaps to a list
+    ; TODO: we need to append to the list of swaps so far, not create a new list
 )
 
 
