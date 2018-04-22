@@ -13,65 +13,6 @@
 ;               fewest number of swaps.
 
 
-; TODO: Move adjacency map to a separate function
-; ---------------------------- Adjacency Map ----------------------------
-; adjacency map: a list of lists; each of these sublists includes a location as 
-;                 its first item and all locations that are adjacent to that 
-;                 location as its remaining items.
-(define adjacency-map '(
-    (Alabama Mississippi Tennessee Georgia Florida)
-    (Alaska)
-    (Arkansas Texas Oklahoma Missouri Tennessee Mississippi Louisiana)
-    (Arizona California Nevada Utah New-Mexico)
-    (California Arizona Nevada Oregon)
-    (Colorado New-Mexico Utah Wyoming Nebraska Kansas Oklahoma)
-    (Connecticut New-York Massachusetts Rhode-Island)
-    (Delaware Maryland Pennsylvania New-Jersey)
-    (Florida Alabama Georgia)
-    (Georgia Florida Alabama Tennessee North-Carolina South-Carolina)
-    (Hawaii)
-    (Idaho Oregon Washington Montana Wyoming Utah Nevada)
-    (Indiana Illinois Michigan Ohio Kentucky)
-    (Illinois Missouri Iowa Wisconsin Indiana Kentucky)
-    (Iowa Missouri Illinois Wisconsin Minnesota South-Dakota Nebraska)
-    (Kansas Colorado Nebraska Missouri Oklahoma)
-    (Kentucky Missouri Illinois Indiana Ohio West-Virginia Virginia Tennessee)
-    (Louisiana Texas Arkansas Mississippi)
-    (Maine New-Hampshire)
-    (Maryland Virginia West-Virginia Pennsylvania Delaware)
-    (Massachusetts Rhode-Island Connecticut New-York Vermont New-Hampshire)
-    (Michigan Wisconsin Indiana Ohio)
-    (Minnesota North-Dakota South-Dakota Iowa Wisconsin)
-    (Mississippi Louisiana Arkansas Tennessee Alabama)
-    (Missouri Oklahoma Kansas Nebraska Iowa Illinois Kentucky Tennessee Arkansas)
-    (Montana Idaho Wyoming South-Dakota North-Dakota)
-    (Nebraska Colorado Kansas Missouri Iowa South-Dakota Wyoming)
-    (Nevada California Arizona Utah Idaho Oregon)
-    (New-Hampshire Maine Vermont Massachusetts)
-    (New-Jersey Delaware Pennsylvania New-York)
-    (New-Mexico Texas Oklahoma Colorado Arizona)
-    (New-York Pennsylvania New-Jersey Connecticut Massachusetts Vermont)
-    (North-Carolina South-Carolina Georgia Tennessee Virginia)
-    (North-Dakota Montana South-Dakota Minnesota)
-    (Ohio Michigan Indiana Kentucky West-Virginia Pennsylvania)
-    (Oklahoma Texas New-Mexico Colorado Kansas Missouri Arkansas)
-    (Oregon Washington Idaho Nevada California)
-    (Pennsylvania Ohio West-Virginia Maryland Delaware New-Jersey New-York)
-    (Rhode-Island Connecticut Massachusetts)
-    (South-Carolina Georgia North-Carolina)
-    (South-Dakota Nebraska Iowa Minnesota North-Dakota Montana Wyoming)
-    (Tennessee Arkansas Missouri Kentucky Virginia North-Carolina Georgia Alabama Mississippi)
-    (Texas New-Mexico Oklahoma Arkansas Louisiana)
-    (Utah Nevada Idaho Wyoming Colorado Arizona)
-    (Vermont New-York Massachusetts New-Hampshire)
-    (Virginia North-Carolina Tennessee Kentucky West-Virginia Maryland)
-    (Washington Oregon Idaho)
-    (West-Virginia Virginia Kentucky Ohio Pennsylvania Maryland)
-    (Wisconsin Minnesota Iowa Illinois Michigan)
-    (Wyoming Idaho Montana South-Dakota Nebraska Colorado Utah)
-))
-
-
 ; ------------------------- Helper Functions -------------------------
 ; This function returns the nth item of a list
 (define (nth-item index list)
@@ -130,80 +71,68 @@
 )
 
 
-; This function returns a list of all possible swaps that can be performed. The
-; parameter passed represents the number of elements there are
-; ASSUMPTION: At least two items in this list
-(define (all-swaps curr target)
+; Helper function for all-swaps
+(define (swap-helper curr target)
     ; Base Case: if current + 1 = target, we return ((curr target))
     (cond ((= (+ curr 1) target) (list (list curr target)))
-        (#t (cons (list curr target) (all-swaps (+ curr 1) target)))
+        (#t (cons (list curr target) (swap-helper (+ curr 1) target)))
     )
 )
 
-(define (all-swaps-2 curr target)
-    ; Call all-swaps from curr target, then curr target - 1, then curr target -2
+
+; This function returns a list of all possible swaps that can be performed given
+; a starting number and a target number
+(define (all-swaps curr target)
+    ; Base Case: Call all swaps, until target is decremented to value of 1
     (cond ((= (- target 1) 1) (list (list curr target)))
-        (#t (append (all-swaps curr target) (all-swaps-2 curr (- target 1))))
+        ; Append list from the swap-helper with another swap-helper list with a decremented target
+        (#t (append (swap-helper curr target) (all-swaps curr (- target 1))))
     )
 )
 
-; (all-swaps 1 5)
-(all-swaps-2 1 4)
+
+; This function performs all possible swaps on the list of elements
+(define (swap-all elements swaps)
+    ; Base Case: If we've gone through the entire list of swaps, return empty list
+    (cond ((null? swaps) '())
+        (#t (cons (swap-elements (nth-item 1 (car swaps)) (nth-item 2 (car swaps)) elements) (swap-all elements (cdr swaps))))
+    )
+)
 
 
-; TODO: Adjacency Map Function Call
-; (is-adjacent? 'Florida 'Georgia '(
-;     (Alabama Mississippi Tennessee Georgia Florida)
-;     (Alaska)
-;     (Arkansas Texas Oklahoma Missouri Tennessee Mississippi Louisiana)
-;     (Arizona California Nevada Utah New-Mexico)
-;     (California Arizona Nevada Oregon)
-;     (Colorado New-Mexico Utah Wyoming Nebraska Kansas Oklahoma)
-;     (Connecticut New-York Massachusetts Rhode-Island)
-;     (Delaware Maryland Pennsylvania New-Jersey)
-;     (Florida Alabama Georgia)
-;     (Georgia Florida Alabama Tennessee North-Carolina South-Carolina)
-;     (Hawaii)
-;     (Idaho Oregon Washington Montana Wyoming Utah Nevada)
-;     (Indiana Illinois Michigan Ohio Kentucky)
-;     (Illinois Missouri Iowa Wisconsin Indiana Kentucky)
-;     (Iowa Missouri Illinois Wisconsin Minnesota South-Dakota Nebraska)
-;     (Kansas Colorado Nebraska Missouri Oklahoma)
-;     (Kentucky Missouri Illinois Indiana Ohio West-Virginia Virginia Tennessee)
-;     (Louisiana Texas Arkansas Mississippi)
-;     (Maine New-Hampshire)
-;     (Maryland Virginia West-Virginia Pennsylvania Delaware)
-;     (Massachusetts Rhode-Island Connecticut New-York Vermont New-Hampshire)
-;     (Michigan Wisconsin Indiana Ohio)
-;     (Minnesota North-Dakota South-Dakota Iowa Wisconsin)
-;     (Mississippi Louisiana Arkansas Tennessee Alabama)
-;     (Missouri Oklahoma Kansas Nebraska Iowa Illinois Kentucky Tennessee Arkansas)
-;     (Montana Idaho Wyoming South-Dakota North-Dakota)
-;     (Nebraska Colorado Kansas Missouri Iowa South-Dakota Wyoming)
-;     (Nevada California Arizona Utah Idaho Oregon)
-;     (New-Hampshire Maine Vermont Massachusetts)
-;     (New-Jersey Delaware Pennsylvania New-York)
-;     (New-Mexico Texas Oklahoma Colorado Arizona)
-;     (New-York Pennsylvania New-Jersey Connecticut Massachusetts Vermont)
-;     (North-Carolina South-Carolina Georgia Tennessee Virginia)
-;     (North-Dakota Montana South-Dakota Minnesota)
-;     (Ohio Michigan Indiana Kentucky West-Virginia Pennsylvania)
-;     (Oklahoma Texas New-Mexico Colorado Kansas Missouri Arkansas)
-;     (Oregon Washington Idaho Nevada California)
-;     (Pennsylvania Ohio West-Virginia Maryland Delaware New-Jersey New-York)
-;     (Rhode-Island Connecticut Massachusetts)
-;     (South-Carolina Georgia North-Carolina)
-;     (South-Dakota Nebraska Iowa Minnesota North-Dakota Montana Wyoming)
-;     (Tennessee Arkansas Missouri Kentucky Virginia North-Carolina Georgia Alabama Mississippi)
-;     (Texas New-Mexico Oklahoma Arkansas Louisiana)
-;     (Utah Nevada Idaho Wyoming Colorado Arizona)
-;     (Vermont New-York Massachusetts New-Hampshire)
-;     (Virginia North-Carolina Tennessee Kentucky West-Virginia Maryland)
-;     (Washington Oregon Idaho)
-;     (West-Virginia Virginia Kentucky Ohio Pennsylvania Maryland)
-;     (Wisconsin Minnesota Iowa Illinois Michigan)
-;     (Wyoming Idaho Montana South-Dakota Nebraska Colorado Utah)
-; ))
+; This function formats the output of the swapped elements
+; (define (format-swapped elements swaps)
+
+; )
+
+
+; This function will return all children of the current state by returning all
+; possible swaps that can be made.
+(define (get-children frontier)  ; TODO: Is this actually called the frontier?
+    (swap-all (nth-item 1 frontier) (all-swaps 1 (length (nth-item 1 frontier))))
+
+    ; Iterate through all-swaps and actually swap those elements
+    ; Append new swaps to a list
+)
+
+
+(get-children '((Alabama Arizona Alaska) ()))
+
+
+; (load "map.scm")
+; (is-adjacent? 'Florida 'Georgia adjacency-map)
+
+
+; (define (dfs frontier)
+;    (cond
+;        ((null? frontier)  ; Base Case: if you have a null list, you failed
+;            #f )
+;        ((goal-test (car frontier))  ; Check the head of the frontier if it's the goal state
+;            (car frontier))
+;        (#t  ; Append children of frontier with the cdr of the frontier back into dfs
+;            (dfs (append (get-children car(frontier)) (cdr frontier))))
+;     )
+; )
 
 
 ; ------------------------------ Main Function ------------------------------
@@ -219,25 +148,10 @@
 ;     body)
 
 
-; State Representation
-; ((Alabama Mississippi Florida) ((1 2) (2 3)))
-
-
+; ------------------------------ Tests ------------------------------
 ; (id-dfs '(Tennessee Iowa Kentucky North-Carolina Missouri))
 ; ; $1 = ((North-Carolina Tennessee Kentucky Missouri Iowa) ((1 2) (1 4) (4 5)))
 ; (id-dfs '(California))
 ; ; $2 = ((California) ())
 ; (id-dfs '(Arizona Alaska))
 ; ; $3 = #f
-
-
-; (define (dfs frontier)
-;    (cond
-;        ((null? frontier)  ; Base Case: if you have a null list, you failed
-;            #f )
-;        ((goal-test (car frontier))  ; Check the head of the frontier if it's the goal state
-;            (car frontier))
-;        (#t  ; Append children of frontier with the cdr of the frontier back into dfs
-;            (dfs (append (get-children car(frontier)) (cdr frontier))))
-;     )
-; )
