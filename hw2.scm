@@ -44,7 +44,8 @@
 ; specific element
 (define (2d-has-element? val list)
     ; Iterate through list and return list if the head is equal to val
-    (cond ((equal? (car (car list)) val) (car list))
+    (cond ((null? list) '())
+        ((equal? (car (car list)) val) (car list))  ; TODO: Why is this returning nothing for me?
         (#t (2d-has-element? val (cdr list)))
     )
 )
@@ -53,9 +54,8 @@
 ; This function searches through a list to see if it contains a specific element
 (define (has-element? val list)
     ; Iterate through list and return element
-    (cond ((equal? (car list) val) val)
-        ; If element is not found, return an empty list
-        ((null? list) '())
+    (cond ((null? list) '())
+        ((equal? (car list) val) val)
         (#t (has-element? val (cdr list)))
     )
 )
@@ -111,28 +111,37 @@
 )
 
 
-; This function receives the result of format-swapped which has already swapped
-; all the states. It then includes all the previous states
-; (define (add-prev-states result prev)
-
-; )
-
-
 ; This function will return all children of the current state by returning all
 ; possible swaps that can be made.
-(define (get-children frontier)  ; TODO: Is this actually called the frontier?
-    (let ((swaps (all-swaps 1 (length (nth-item 1 frontier))))
-        (prev-states (nth-item 2 frontier)))
-        (format-swapped (swap-all (nth-item 1 frontier) swaps) swaps prev-states)
+(define (get-children node)
+    (let ((swaps (all-swaps 1 (length (nth-item 1 node))))
+        (prev-states (nth-item 2 node)))
+        ; Swap all the states, then format the output
+        (format-swapped (swap-all (nth-item 1 node) swaps) swaps prev-states)
     )
 )
 
 
-(get-children '((Alabama Arizona Alaska) ()))
+; This function will check if the current node we are at represents the goal state
+(define (is-goal-state? node)
+    (let ((state (car node))
+        (next-state (cons (cdr (nth-item 1 node)) (list (nth-item 2 node)))))
+        (cond ((null? (cdr state)) #f)
+            ((is-adjacent? (nth-item 1 state) (nth-item 2 state) adjacency-map) 
+                (cond ((= (length state) 2) #t)
+                    (#t (is-goal-state? next-state))
+                )
+            )
+            (#t #f)  ; if not adjacent, return false
+        )
+    )
+)
 
 
-; (load "map.scm")
-; (is-adjacent? 'Florida 'Georgia adjacency-map)
+(load "map.scm")
+(is-goal-state? '((Oregon Nevada)()))
+
+; Does not work when this is supposed to return TRUE
 
 
 ; (define (dfs frontier)
