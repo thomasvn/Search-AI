@@ -13,6 +13,10 @@
 ;               fewest number of swaps.
 
 
+; ------------------------- Include Functions -------------------------
+(load "map.scm")
+
+
 ; ------------------------- Helper Functions -------------------------
 ; This function returns the nth item of a list
 (define (nth-item index list)
@@ -124,37 +128,53 @@
 
 ; This function will check if the current node we are at represents the goal state
 (define (is-goal-state? node)
+    ; state variable has list of swapped locations
     (let ((state (car node))
+        ; next-state variable is just the tail of the state variable formatted with the original input
         (next-state (cons (cdr (nth-item 1 node)) (list (nth-item 2 node)))))
+        ; If there aren't at least two items in this list, cannot be adjacent
         (cond ((null? (cdr state)) #f)
+            ; Check whether the first two items are adjacent
             ((is-adjacent? (nth-item 1 state) (nth-item 2 state) adjacency-map) 
+                ; When we're down to our last two states we are finished, else recurse through states
                 (cond ((= (length state) 2) #t)
                     (#t (is-goal-state? next-state))
                 )
             )
-            (#t #f)  ; if not adjacent, return false
+            ; If is-adjacent? did not return true for given two items, return false
+            (#t #f)
         )
     )
 )
 
 
-(load "map.scm")
-(is-goal-state? '((Oregon Nevada)()))
+; This function will format the starting point of the frontier to include 
+; internal state representation
+(define (format-frontier frontier)
+    (cons frontier (list '()))
+)
 
-; Does not work when this is supposed to return TRUE
 
-
-; (define (dfs frontier)
-;    (cond
-;        ((null? frontier)  ; Base Case: if you have a null list, you failed
-;            #f )
-;        ((goal-test (car frontier))  ; Check the head of the frontier if it's the goal state
-;            (car frontier))
-;        (#t  ; Append children of frontier with the cdr of the frontier back into dfs
-;            (dfs (append (get-children car(frontier)) (cdr frontier))))
-;     )
+; This function appends the children to the frontier when doing a depth first search
+; (define (dfs-append children frontier)
+;     (append (car ))
 ; )
 
+
+; This function will do a depth first search on the frontier
+(define (dfs frontier)
+    (let ((next-state (cond (null? (nth-item 2 frontier)) (append (cdr (nth-item 1 frontier)) (car (nth-item 2 frontier)))
+            (#t (append (cdr (nth-item 1 frontier)) (cdr (nth-item 2 frontier)))))))
+        (cond
+            ((null? (car frontier)) #f)  ; Base Case: if you have a null list, you failed
+            ((is-goal-state? frontier) frontier)  ; Check the the frontier if it's the goal state
+            (#t (dfs (append (get-children frontier) next-state)))  ; Append children of frontier with the cdr of the frontier back into dfs
+        )
+    )
+)
+
+(dfs (format-frontier '(Tennessee Iowa Kentucky North-Carolina Missouri)))
+; (format-frontier '(Tennessee Iowa Kentucky North-Carolina Missouri))
 
 ; ------------------------------ Main Function ------------------------------
 ; This function implements an iterative-deepening depth first search to reach
