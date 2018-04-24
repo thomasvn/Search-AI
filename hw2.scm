@@ -110,7 +110,10 @@
     ; Base Case: If we've gone through the entire list of swaps, return empty list
     (cond ((null? swaps) '())
         ; Pair the element with the swap that was made, then recursively continue
-        (#t (cons (cons (car elements) (append prev (list (car swaps)))) (format-swapped (cdr elements) (cdr swaps) prev)))
+        (#t (cond ((null? prev) (cons (cons (car elements) (append prev (list (car swaps)))) (format-swapped (cdr elements) (cdr swaps) prev)))
+                (#t (cons (cons (car elements) (list (cons prev (list (car swaps))))) (format-swapped (cdr elements) (cdr swaps) prev)))
+            )
+        )
     )
 )
 
@@ -132,10 +135,10 @@
     (let ((state (car node))
         ; next-state variable is just the tail of the state variable formatted with the original input
         (next-state (cons (cdr (nth-item 1 node)) (list (nth-item 2 node)))))
-        ; If there aren't at least two items in this list, cannot be adjacent
-        (cond ((null? (cdr state)) #f)
+        ; If there's only a single item in the list, it automatically passes
+        (cond ((null? (cdr state)) #t)
             ; Check whether the first two items are adjacent
-            ((is-adjacent? (nth-item 1 state) (nth-item 2 state) adjacency-map) 
+            ((is-adjacent? (nth-item 1 state) (nth-item 2 state) adjacency-map)
                 ; When we're down to our last two states we are finished, else recurse through states
                 (cond ((= (length state) 2) #t)
                     (#t (is-goal-state? next-state))
@@ -151,30 +154,55 @@
 ; This function will format the starting point of the frontier to include 
 ; internal state representation
 (define (format-frontier frontier)
-    (cons frontier (list '()))
+    (list (cons frontier (list '())))
 )
 
 
-; This function appends the children to the frontier when doing a depth first search
-; (define (dfs-append children frontier)
-;     (append (car ))
-; )
+; This function takes a frontier, and iterates through all its nodes to check if
+; one of the nodes is the goal-state
+(define (frontier-has-goal? frontier)
+    (cond ((is-goal-state? (car frontier)) #t)
+        ((null? (cdr frontier)) #f)  ; Base Case: No more items to check
+        (#t (frontier-has-goal? (cdr frontier)))
+    )
+)
 
 
 ; This function will do a depth first search on the frontier
 (define (dfs frontier)
+    ; The next-state variable is the frontier without the currently visited state and corresponding swap history
     (let ((next-state (cond (null? (nth-item 2 frontier)) (append (cdr (nth-item 1 frontier)) (car (nth-item 2 frontier)))
             (#t (append (cdr (nth-item 1 frontier)) (cdr (nth-item 2 frontier)))))))
         (cond
             ((null? (car frontier)) #f)  ; Base Case: if you have a null list, you failed
-            ((is-goal-state? frontier) frontier)  ; Check the the frontier if it's the goal state
+            ((frontier-has-goal? frontier) frontier)  ; Check the the frontier if it's the goal state
             (#t (dfs (append (get-children frontier) next-state)))  ; Append children of frontier with the cdr of the frontier back into dfs
         )
     )
 )
 
-(dfs (format-frontier '(Tennessee Iowa Kentucky North-Carolina Missouri)))
-; (format-frontier '(Tennessee Iowa Kentucky North-Carolina Missouri))
+
+; This function will do an iterative depth first search on the frontier
+(define (i-dfs frontier depth)
+    (begin (display frontier)
+    (newline)
+    (newline)
+    (let ((next-state (cond ((null? (cdr frontier)) (car frontier))
+        (#t (cdr frontier)))))
+        (cond
+            ((null? (car frontier)) #f)
+            ((is-goal-state? (car frontier)) (car frontier))  ; TODO: This is not a DFS if we check all children
+            ((equal? depth 0) #f)  ; Check depth before recursing any deeper
+            (#t (i-dfs (append (get-children (car frontier)) next-state) (- depth 1)))
+        )
+    )
+    )
+)
+
+
+; (dfs (format-frontier '(Tennessee Iowa Kentucky North-Carolina Missouri)))
+(i-dfs (format-frontier '(California Utah Nevada)) 3)
+
 
 ; ------------------------------ Main Function ------------------------------
 ; This function implements an iterative-deepening depth first search to reach
@@ -186,7 +214,10 @@
 ; be a list of pairs indicating which items need to be swapped in order to reach 
 ; the solution state.
 ; (define (id-dfs locations)
-;     body)
+;     ; Format the locations
+;     ; Pass to DFS
+;     ; Write a DFS which will take a certain depth of cycles
+; )
 
 
 ; ------------------------------ Tests ------------------------------
