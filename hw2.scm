@@ -98,7 +98,8 @@
 ; This function performs all possible swaps on the list of elements
 (define (swap-all elements swaps)
     ; Base Case: If we've gone through the entire list of swaps, return empty list
-    (cond ((null? swaps) '())
+    (cond (
+        (null? swaps) '())
         ; Swap the elements, then recurse with the tail of the swaps
         (#t (cons (swap-elements (nth-item 1 (car swaps)) (nth-item 2 (car swaps)) elements) (swap-all elements (cdr swaps))))
     )
@@ -107,16 +108,26 @@
 
 ; This function formats the output of the swapped elements
 (define (format-swapped elements swaps prev)
-    ; Base Case: If we've gone through the entire list of swaps, return empty list
-    (cond ((null? swaps) '())
+    (begin (display swaps) (newline) (display prev) (newline) (newline)
+    (cond
+        ; Base Case: If we've gone through the entire list of swaps, return empty list
+        ((null? swaps) '())
         ; Pair the element with the swap that was made, then recursively continue
-        (#t (cond ((null? prev) (cons (cons (car elements) (append prev (list (car swaps)))) (format-swapped (cdr elements) (cdr swaps) prev)))
-                (#t (cons (cons (car elements) (list (cons prev (list (car swaps))))) (format-swapped (cdr elements) (cdr swaps) prev)))
+        (#t (cond 
+                (
+                    (null? prev) 
+                        (cons (cons (car elements) (list (cons (car swaps) prev))) (format-swapped (cdr elements) (cdr swaps) prev))
+                )
+
+                (
+                    #t
+                        (cons (cons (car elements)  (list(cons (car swaps) prev ))) (format-swapped (cdr elements) (cdr swaps) prev))
+                )
             )
         )
     )
+    )
 )
-
 
 ; This function will return all children of the current state by returning all
 ; possible swaps that can be made.
@@ -127,6 +138,7 @@
         (format-swapped (swap-all (nth-item 1 node) swaps) swaps prev-states)
     )
 )
+
 
 
 ; This function will check if the current node we are at represents the goal state
@@ -186,13 +198,18 @@
 (define (i-dfs frontier depth)
     (begin (display frontier)
     (newline)
+    (display depth)
+    (newline)
+    (display (length (cdr (car frontier))))
+    (newline)
     (newline)
     (let ((next-state (cond ((null? (cdr frontier)) (car frontier))
-        (#t (cdr frontier)))))
+        (#t (cdr frontier))))
+        (next-depth (- (length (cdr (car frontier))) 1)))
         (cond
             ((null? (car frontier)) #f)
-            ((is-goal-state? (car frontier)) (car frontier))  ; TODO: This is not a DFS if we check all children
-            ((equal? depth 0) #f)  ; Check depth before recursing any deeper
+            ((is-goal-state? (car frontier)) (car frontier))
+            ((= depth 0) (i-dfs next-state next-depth))
             (#t (i-dfs (append (get-children (car frontier)) next-state) (- depth 1)))
         )
     )
@@ -201,7 +218,8 @@
 
 
 ; (dfs (format-frontier '(Tennessee Iowa Kentucky North-Carolina Missouri)))
-(i-dfs (format-frontier '(California Utah Nevada)) 3)
+; (i-dfs (format-frontier '(California Utah Nevada)) 3)
+; (i-dfs (format-frontier '(Tennessee Iowa Kentucky North-Carolina Missouri)) 4)
 
 
 ; ------------------------------ Main Function ------------------------------
