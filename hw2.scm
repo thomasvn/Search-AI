@@ -309,7 +309,6 @@
 ;   INPUT: (i-dfs '((California Utah Nevada) ()) 2)
 ;   OUTPUT: #f or ((Utah Nevada California) ((1 2) (1 3)))
 (define (i-dfs frontier max-depth)
-    (begin (display frontier) (newline) (newline)
     (cond
         (
             ; Base Case: If the frontier is empty, do not search
@@ -354,7 +353,6 @@
                 )
             )
         )
-    )
     )
 )
 
@@ -417,3 +415,21 @@
 ; ; $2 = ((California) ())
 ; (id-dfs '(Arizona Alaska))
 ; ; $3 = #f
+
+; These tests should work
+; (id-dfs '(California))
+; (id-dfs '(California Washington))
+; (id-dfs '(California Washington Oregon))
+; (id-dfs '(Idaho California Washington Oregon))
+; (id-dfs '(Nevada Idaho California Washington Oregon))
+; (id-dfs '(Nevada Idaho California Washington Oregon Arizona))
+; (id-dfs '(Nevada Idaho California Washington Oregon Arizona Montana))
+; (id-dfs '(Wyoming Nevada Idaho California Washington Oregon Arizona Montana))
+; (id-dfs '(Utah Wyoming Nevada Idaho California Washington Oregon Arizona Montana))
+
+; These tests should not work
+; (id-dfs '())
+; (id-dfs '(California New-York))
+; (id-dfs '(California Maine Oregon))
+; (id-dfs '(California Vermont Oregon Nevada))
+; (id-dfs '(California Pennsylvania Oregon Nevada Washington))
