@@ -19,25 +19,50 @@
 
 ; ------------------------- Helper Functions -------------------------
 ; This function returns the nth item of a list
+;   INPUT: (nth-item 2 '(1 2 3 4 5))
+;   OUTPUT: 2
 (define (nth-item index list)
-    ; base case, index is equal to 0, return
-    (cond ((equal? 1 index) (car list))
-        ; decrement the index and get tail of list
-        (#t (nth-item (- index 1) (cdr list)))))
+    (cond 
+        (
+            ; Base Case: index is equal to 0, return
+            (equal? 1 index)
+                (car list)
+        )
+        (
+            ; Recurse down the list by decrementing the index and getting tail of list
+            #t 
+                (nth-item (- index 1) (cdr list))
+        )
+    )
+)
 
 
 ; This function replaces the nth item of a list with another value
+;   INPUT: (replace-nth-item 1 '(1 2 3) 4)
+;   OUTPUT: (4 2 3)
 (define (replace-nth-item index list val)
-    ; base case, return the tail of the list pre-pended with the new value
-    (cond ((equal? 1 index) (cons val (cdr list)))
-        ; pre-pend new list with original values that were iterated over
-        (#t (cons (car list) (replace-nth-item (- index 1) (cdr list) val)))))
+    (cond 
+        (
+            ; Base Case: return the tail of the list pre-pended with the new value
+            (equal? 1 index) 
+                (cons val (cdr list))
+        )
+        (
+            ; Pre-pend new list with original values that were iterated over
+            #t
+                (cons (car list) (replace-nth-item (- index 1) (cdr list) val))
+        )
+    )
+)
 
 
 ; This function swaps two elements in a list when passed their indices
+;   INPUT: (swap-elements 1 2 '(1 2 3))
+;   OUTPUT: (2 1 3)
 (define (swap-elements i j lst)
-    ; Temp variable to hold i
-    (let ((temp (nth-item i lst)))
+    (let 
+        ; Temp variable to hold i
+        ((temp (nth-item i lst)))
         ; Assign i=j then assign j=temp
         (replace-nth-item j (replace-nth-item i lst (nth-item j lst)) temp)
     )
@@ -46,69 +71,135 @@
 
 ; This function searches through a 2d list to see if a list's head has a 
 ; specific element
+;   INPUT: (2d-has-element? 'California adjacency-map)
+;   OUTPUT: (California Arizona Nevada Oregon)
 (define (2d-has-element? val list)
-    ; Iterate through list and return list if the head is equal to val
-    (cond ((null? list) '())
-        ((equal? (car (car list)) val) (car list))  ; TODO: Why is this returning nothing for me?
-        (#t (2d-has-element? val (cdr list)))
+    (cond 
+        (
+            ; Base Case: If list is null, return empty list
+            (null? list) 
+                '()
+        )
+        (
+            ; If the head of a list has the target value, return that list
+            (equal? (car (car list)) val) 
+                (car list)
+        )
+        (
+            ; Continue recursing through the 2d list
+            #t 
+                (2d-has-element? val (cdr list))
+        )
     )
 )
 
 
 ; This function searches through a list to see if it contains a specific element
+;   INPUT: (has-element? 3 '(1 2 3))
+;   OUTPUT: 3
 (define (has-element? val list)
-    ; Iterate through list and return element
-    (cond ((null? list) '())
-        ((equal? (car list) val) val)
-        (#t (has-element? val (cdr list)))
+    (cond 
+        (
+            ; Base Case: list is empty, return empty list
+            (null? list) 
+                '()
+        )
+        (
+            ; If we've found the item, return it
+            (equal? (car list) val) 
+                val
+        )
+        (
+            ; Recurse down the list
+            #t
+                (has-element? val (cdr list))
+        )
     )
 )
 
 
 ; This function checks whether two locations are adjacent to each other
+;   INPUT: (is-adjacent? 'California 'Nevada adjacency-map)
+;   OUTPUT: #t or #f
 (define (is-adjacent? loc1 loc2 amap)
-    (let ((result (has-element? loc2 (2d-has-element? loc1 amap))))
-        (cond ((equal? result '()) #f)
-            (#t #t)
+    (let
+        ; Result variable checks whether the sublist contains the second location
+        ((result (has-element? loc2 (2d-has-element? loc1 amap))))
+        (cond 
+            (
+                (equal? result '()) 
+                    #f
+            )
+            (
+                #t 
+                    #t
+            )
         )
     )
 )
 
 
 ; Helper function for all-swaps
+;   INPUT: (swap-helper 1 3)
+;   OUTPUT: ((1 3) (2 3))
 (define (swap-helper curr target)
-    ; Base Case: if current + 1 = target, we return ((curr target))
-    (cond ((= (+ curr 1) target) (list (list curr target)))
-        (#t (cons (list curr target) (swap-helper (+ curr 1) target)))
+    (cond 
+        (
+            ; Base Case: if current + 1 = target, we return ((curr target))
+            (= (+ curr 1) target) 
+                (list (list curr target))
+        )
+        (
+            ; Continue recursing while incrementing current
+            #t 
+                (cons (list curr target) (swap-helper (+ curr 1) target))
+        )
     )
 )
 
 
 ; This function returns a list of all possible swaps that can be performed given
 ; a starting number and a target number
+;   INPUT: (all-swaps 1 3)
+;   OUTPUT: ((1 3) (2 3) (1 2))
 (define (all-swaps curr target)
-    ; Base Case: Call all swaps, until target is decremented to value of 1
-    (cond ((= (- target 1) 1) (list (list curr target)))
-        ; Append list from the swap-helper with another swap-helper list with a decremented target
-        (#t (append (swap-helper curr target) (all-swaps curr (- target 1))))
+    (cond 
+        (
+            ; Base Case: If target is decremented to value of 1, return the list with current and target
+            (= (- target 1) 1) 
+                (list (list curr target))
+        )
+        (
+            ; Append list from the swap-helper (which increments curr) with the list from all-swaps decrementing the target
+            #t 
+                (append (swap-helper curr target) (all-swaps curr (- target 1)))
+        )
     )
 )
 
 
 ; This function performs all possible swaps on the list of elements
+;   INPUT: (swap-all ((Nevada Utah California) (California Nevada Utah) (Utah California Nevada)) ((1 3) (2 3) (1 2)))
+;   OUTPUT: ((Utah Nevada California) (California Utah Nevada) (Nevada California Utah))
 (define (swap-all elements swaps)
-    ; Base Case: If we've gone through the entire list of swaps, return empty list
-    (cond (
-        (null? swaps) '())
-        ; Swap the elements, then recurse with the tail of the swaps
-        (#t (cons (swap-elements (nth-item 1 (car swaps)) (nth-item 2 (car swaps)) elements) (swap-all elements (cdr swaps))))
+    (cond
+        (
+            ; Base Case: If we've gone through the entire list of swaps, return empty list
+            (null? swaps) 
+                '()
+        )
+        (
+            ; Swap the elements, then recurse with the tail of the swaps
+            #t 
+                (cons (swap-elements (nth-item 1 (car swaps)) (nth-item 2 (car swaps)) elements) (swap-all elements (cdr swaps)))
+        )
     )
 )
 
 
 ; This function formats the output of the swapped elements
-; INPUT: (format-swapped ((Nevada Utah California) (California Nevada Utah) (Utah California Nevada)) ((1 3) (2 3) (1 2)) ())
-; OUTPUT: (((Nevada Utah California) ((1 3))) ((California Nevada Utah) ((2 3))) ((Utah California Nevada) ((1 2))))
+;   INPUT: (format-swapped ((Nevada Utah California) (California Nevada Utah) (Utah California Nevada)) ((1 3) (2 3) (1 2)) ())
+;   OUTPUT: (((Nevada Utah California) ((1 3))) ((California Nevada Utah) ((2 3))) ((Utah California Nevada) ((1 2))))
 (define (format-swapped elements swaps prev)
     (cond
         (
@@ -116,29 +207,19 @@
             (null? swaps) 
                 '()
         )
-        ; Pair the element with the swap that was made, then recursively continue
-        (#t 
-            (cond 
-                (
-                    (null? prev) 
-                        (cons (cons (car elements) (list (cons (car swaps) prev))) (format-swapped (cdr elements) (cdr swaps) prev))
-                )
-                (
-                    #t
-                        (cons (cons (car elements) (list(cons (car swaps) prev))) (format-swapped (cdr elements) (cdr swaps) prev))
-                )
-            )
+        (
+            ; Pair the element with the swap that was made, then recursively continue
+            #t 
+                (cons (cons (car elements) (list(cons (car swaps) prev))) (format-swapped (cdr elements) (cdr swaps) prev))
         )
     )
 )
 
-(display (format-swapped '((Nevada Utah California) (California Nevada Utah) (Utah California Nevada)) '((1 3) (2 3) (1 2)) '()))
-
 
 ; This function will return all children of the current state by returning all
 ; possible swaps that can be made.
-; INPUT: (get-children ‘((California Nevada) ()))
-; OUTPUT: (((Nevada California) (1 2)))
+;   INPUT: (get-children ‘((California Nevada) ()))
+;   OUTPUT: (((Nevada California) (1 2)))
 (define (get-children node)
     (let 
         ((swaps (all-swaps 1 (length (nth-item 1 node))))
@@ -150,8 +231,8 @@
 
 
 ; This function will check if the current node we are at represents the goal state
-; INPUT: (is-goal-state? ‘((Alabama Alaska)()))
-; OUTPUT: #t or #f
+;   INPUT: (is-goal-state? ‘((Alabama Alaska)()))
+;   OUTPUT: #t or #f
 (define (is-goal-state? node)
     ; state variable has list of swapped locations
     (let 
@@ -192,8 +273,8 @@
 
 ; This function will format the starting point of the frontier to include 
 ; internal state representation
-; INPUT: (format-frontier '(California Utah Nevada))
-; OUTPUT: ((California Utah Nevada) ())
+;   INPUT: (format-frontier '(California Utah Nevada))
+;   OUTPUT: ((California Utah Nevada) ())
 (define (format-frontier frontier)
     (list (cons frontier (list '())))
 )
@@ -201,8 +282,8 @@
 
 ; This function takes a frontier, and iterates through all its nodes to check if
 ; one of the nodes is the goal-state
-; INPUT: (((California Nevada Utah) ((2 3))) ((Utah California Nevada) ((1 2))) ((California Utah Nevada) ()))
-; OUTPUT: #t or #f
+;   INPUT: (((California Nevada Utah) ((2 3))) ((Utah California Nevada) ((1 2))) ((California Utah Nevada) ()))
+;   OUTPUT: #t or #f
 (define (frontier-has-goal? frontier)
     (cond 
         (
@@ -225,8 +306,8 @@
 
 
 ; This function will do an iterative depth first search on the frontier
-; INPUT: (i-dfs '((California Utah Nevada) ()) 2)
-; OUTPUT: #f or ((Utah Nevada California) ((1 2) (1 3)))
+;   INPUT: (i-dfs '((California Utah Nevada) ()) 2)
+;   OUTPUT: #f or ((Utah Nevada California) ((1 2) (1 3)))
 (define (i-dfs frontier max-depth)
     (begin (display frontier) (newline) (newline)
     (cond
@@ -279,8 +360,8 @@
 
 
 ; Helper function for the id-dfs which maintains depth as an argument
-; INPUT: (id-dfs-helper '(California Utah Nevada) 0 2)
-; OUTPUT: #f or ((Utah Nevada California) ((1 2) (1 3)))
+;   INPUT: (id-dfs-helper '(California Utah Nevada) 0 2)
+;   OUTPUT: #f or ((Utah Nevada California) ((1 2) (1 3)))
 (define (id-dfs-helper locations curr-depth max-depth)
     (cond 
         (
@@ -321,9 +402,9 @@
 ; of locations sorted into a valid solution state. The second return item will 
 ; be a list of pairs indicating which items need to be swapped in order to reach 
 ; the solution state.
-; INPUT: (id-dfs '(Tennessee Iowa Kentucky North-Carolina Missouri))
-; OUTPUT: ((North-Carolina Tennessee Kentucky Missouri Iowa) ((1 4) (2 5) (1 5)))
-; ASSUMES: The list of locations does not have sublists, and has valid entries
+;   INPUT: (id-dfs '(Tennessee Iowa Kentucky North-Carolina Missouri))
+;   OUTPUT: ((North-Carolina Tennessee Kentucky Missouri Iowa) ((1 4) (2 5) (1 5)))
+;   ASSUMES: The list of locations does not have sublists, and has valid entries
 (define (id-dfs locations)
     (id-dfs-helper locations 1 (length locations))
 )
