@@ -129,6 +129,8 @@
 
 ; This function will return all children of the current state by returning all
 ; possible swaps that can be made.
+; INPUT: (get-children ‘((California Nevada) ()))
+; OUTPUT: (((Nevada California) (1 2)))
 (define (get-children node)
     (let ((swaps (all-swaps 1 (length (nth-item 1 node))))
         (prev-states (nth-item 2 node)))
@@ -138,8 +140,9 @@
 )
 
 
-
 ; This function will check if the current node we are at represents the goal state
+; INPUT: (is-goal-state? ‘((Alabama Alaska)()))
+; OUTPUT: #t or #f
 (define (is-goal-state? node)
     ; state variable has list of swapped locations
     (let ((state (car node))
@@ -196,12 +199,8 @@
 (define (i-dfs frontier max-depth)
     (begin (display frontier)
     (newline)
-    (display (length (car (cdr (car frontier)))))
     (newline)
-    (display (car (car frontier)))
-    (newline)
-    (newline)
-    (cond 
+    (cond
         (
             ; Base Case: If the frontier is empty, do not search
             (null? (car (car frontier)))
@@ -213,21 +212,21 @@
                 #t
         )
         (#t
-            (let ((next-state (cond ((null? (cdr frontier)) (car frontier))
-                (#t (cdr frontier))))
-                (curr-depth (length (car (cdr (car frontier))))))
+            (let ((next-state (cond ((null? (cdr frontier)) frontier)
+                    (#t (cdr frontier)))))
                 (cond
                     (
-                        (is-goal-state? (car frontier)) 
+                        (is-goal-state? (car frontier))
                             (car frontier)
                     )
                     (
                         ; Base Case: If not a goal state, but rest of list is empty there is no solution
-                        (null? (cdr frontier))
+                        (equal? (length (cdr frontier)) 1)
                             #f
                     )
                     (
-                        (equal? curr-depth max-depth)
+                        ; If we are at our max depth, do not get children ... continue with DFS
+                        (equal? (length (car (cdr (car frontier)))) max-depth)
                             (i-dfs next-state max-depth)
                     )
                     (
@@ -242,14 +241,28 @@
 )
 
 
-; (dfs (format-frontier '(Tennessee Iowa Kentucky North-Carolina Missouri)))
-; (i-dfs (format-frontier '(California Utah Nevada)) 3)
-; (i-dfs (format-frontier '(Tennessee Iowa Kentucky North-Carolina Missouri)) 4)
-; (i-dfs (format-frontier '()) 1)
-; (i-dfs (format-frontier '(California)) 1)
-; (i-dfs (format-frontier '(Arizona Alaska)) 1)
-
-; (i-dfs (format-frontier '(California Washington)) 1)
+; Helper function for the id-dfs
+(define (id-dfs-helper locations curr-depth max-depth)
+    (cond 
+        (
+            (equal? curr-depth max-depth)
+                #f
+        )
+        (
+            #t 
+                (display (i-dfs (format-frontier locations) curr-depth))
+        )
+        (
+            (i-dfs (format-frontier locations) curr-depth)
+                (i-dfs (format-frontier locations) curr-depth)
+        )
+        (
+            ; If the DFS with the previous depth failed, go here
+            #t
+                (id-dfs-helper locations (+ curr-depth 1) max-depth)
+        )
+    )
+)
 
 
 ; ------------------------------ Main Function ------------------------------
@@ -262,12 +275,7 @@
 ; be a list of pairs indicating which items need to be swapped in order to reach 
 ; the solution state.
 (define (id-dfs locations)
-    ; Iterate through all locations and check to see whether
-
-
-    ; Format the locations
-    ; Pass to DFS
-    ; Write a DFS which will take a certain depth of cycles
+    (id-dfs-helper locations 4 (length locations))
 )
 
 
