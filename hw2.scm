@@ -164,20 +164,7 @@
 ; This function will format the starting point of the frontier to include 
 ; internal state representation
 (define (format-frontier frontier)
-    (cond 
-        (
-            (null? frontier) 
-                #f
-        )
-        (
-            (null? (car frontier))
-                #f
-        )
-        (
-            #t 
-                (list (cons frontier (list '())))
-        )
-    )
+    (list (cons frontier (list '())))
 )
 
 
@@ -211,12 +198,19 @@
     (newline)
     (display (length (car (cdr (car frontier)))))
     (newline)
+    (display (car (car frontier)))
+    (newline)
     (newline)
     (cond 
         (
             ; Base Case: If the frontier is empty, do not search
-            (equal? frontier #f)
+            (null? (car (car frontier)))
                 #f
+        )
+        (
+            ; Base Case: If frontier only has one element, it works
+            (equal? (length (car (car frontier))) 1)
+                #t
         )
         (#t
             (let ((next-state (cond ((null? (cdr frontier)) (car frontier))
@@ -224,12 +218,13 @@
                 (curr-depth (length (car (cdr (car frontier))))))
                 (cond
                     (
-                        (null? (car frontier))
-                            #f
-                    )
-                    (
                         (is-goal-state? (car frontier)) 
                             (car frontier)
+                    )
+                    (
+                        ; Base Case: If not a goal state, but rest of list is empty there is no solution
+                        (null? (cdr frontier))
+                            #f
                     )
                     (
                         (equal? curr-depth max-depth)
@@ -251,6 +246,10 @@
 ; (i-dfs (format-frontier '(California Utah Nevada)) 3)
 ; (i-dfs (format-frontier '(Tennessee Iowa Kentucky North-Carolina Missouri)) 4)
 ; (i-dfs (format-frontier '()) 1)
+; (i-dfs (format-frontier '(California)) 1)
+; (i-dfs (format-frontier '(Arizona Alaska)) 1)
+
+; (i-dfs (format-frontier '(California Washington)) 1)
 
 
 ; ------------------------------ Main Function ------------------------------
@@ -262,11 +261,14 @@
 ; of locations sorted into a valid solution state. The second return item will 
 ; be a list of pairs indicating which items need to be swapped in order to reach 
 ; the solution state.
-; (define (id-dfs locations)
-;     ; Format the locations
-;     ; Pass to DFS
-;     ; Write a DFS which will take a certain depth of cycles
-; )
+(define (id-dfs locations)
+    ; Iterate through all locations and check to see whether
+
+
+    ; Format the locations
+    ; Pass to DFS
+    ; Write a DFS which will take a certain depth of cycles
+)
 
 
 ; ------------------------------ Tests ------------------------------
