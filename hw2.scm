@@ -196,10 +196,9 @@
 
 
 ; This function will do an iterative depth first search on the frontier
+; INPUT: (i-dfs '((California Utah Nevada) ()) 2)
+; OUTPUT: #f or ((Utah Nevada California) ((1 2) (1 3)))
 (define (i-dfs frontier max-depth)
-    (begin (display frontier)
-    (newline)
-    (newline)
     (cond
         (
             ; Base Case: If the frontier is empty, do not search
@@ -237,23 +236,31 @@
             )
         )
     )
-    )
 )
 
 
 ; Helper function for the id-dfs
+; INPUT: (id-dfs-helper '(California Utah Nevada) 0 2)
+; OUTPUT: #f or ((Utah Nevada California) ((1 2) (1 3)))
 (define (id-dfs-helper locations curr-depth max-depth)
     (cond 
         (
+            ; Base Case: If no locations, return false
+            (null? locations)
+                #f
+        )
+        (
+            ; Base Case: If one location, return true
+            (equal? (length locations) 1)
+                (car (format-frontier locations))
+        )
+        (
+            ; Base Case: If we have tried all depths to the max depth, return false
             (equal? curr-depth max-depth)
                 #f
         )
         (
-            #t 
-                (display (i-dfs (format-frontier locations) curr-depth))
-        )
-        (
-            (i-dfs (format-frontier locations) curr-depth)
+            (list? (i-dfs (format-frontier locations) curr-depth))
                 (i-dfs (format-frontier locations) curr-depth)
         )
         (
@@ -275,13 +282,13 @@
 ; be a list of pairs indicating which items need to be swapped in order to reach 
 ; the solution state.
 (define (id-dfs locations)
-    (id-dfs-helper locations 4 (length locations))
+    (id-dfs-helper locations 1 (length locations))
 )
 
 
 ; ------------------------------ Tests ------------------------------
 ; (id-dfs '(Tennessee Iowa Kentucky North-Carolina Missouri))
-; ; $1 = ((North-Carolina Tennessee Kentucky Missouri Iowa) ((1 2) (1 4) (4 5)))
+; $1 = ((North-Carolina Tennessee Kentucky Missouri Iowa) ((1 2) (1 4) (4 5)))
 ; (id-dfs '(California))
 ; ; $2 = ((California) ())
 ; (id-dfs '(Arizona Alaska))
