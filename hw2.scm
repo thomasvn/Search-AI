@@ -108,7 +108,6 @@
 
 ; This function formats the output of the swapped elements
 (define (format-swapped elements swaps prev)
-    (begin (display swaps) (newline) (display prev) (newline) (newline)
     (cond
         ; Base Case: If we've gone through the entire list of swaps, return empty list
         ((null? swaps) '())
@@ -125,7 +124,6 @@
                 )
             )
         )
-    )
     )
 )
 
@@ -166,7 +164,20 @@
 ; This function will format the starting point of the frontier to include 
 ; internal state representation
 (define (format-frontier frontier)
-    (list (cons frontier (list '())))
+    (cond 
+        (
+            (null? frontier) 
+                #f
+        )
+        (
+            (null? (car frontier))
+                #f
+        )
+        (
+            #t 
+                (list (cons frontier (list '())))
+        )
+    )
 )
 
 
@@ -195,22 +206,41 @@
 
 
 ; This function will do an iterative depth first search on the frontier
-(define (i-dfs frontier depth)
+(define (i-dfs frontier max-depth)
     (begin (display frontier)
     (newline)
-    (display depth)
-    (newline)
-    (display (length (cdr (car frontier))))
+    (display (length (car (cdr (car frontier)))))
     (newline)
     (newline)
-    (let ((next-state (cond ((null? (cdr frontier)) (car frontier))
-        (#t (cdr frontier))))
-        (next-depth (- (length (cdr (car frontier))) 1)))
-        (cond
-            ((null? (car frontier)) #f)
-            ((is-goal-state? (car frontier)) (car frontier))
-            ((= depth 0) (i-dfs next-state next-depth))
-            (#t (i-dfs (append (get-children (car frontier)) next-state) (- depth 1)))
+    (cond 
+        (
+            ; Base Case: If the frontier is empty, do not search
+            (equal? frontier #f)
+                #f
+        )
+        (#t
+            (let ((next-state (cond ((null? (cdr frontier)) (car frontier))
+                (#t (cdr frontier))))
+                (curr-depth (length (car (cdr (car frontier))))))
+                (cond
+                    (
+                        (null? (car frontier))
+                            #f
+                    )
+                    (
+                        (is-goal-state? (car frontier)) 
+                            (car frontier)
+                    )
+                    (
+                        (equal? curr-depth max-depth)
+                            (i-dfs next-state max-depth)
+                    )
+                    (
+                        #t 
+                            (i-dfs (append (get-children (car frontier)) next-state) max-depth)
+                    )
+                )
+            )
         )
     )
     )
@@ -220,6 +250,7 @@
 ; (dfs (format-frontier '(Tennessee Iowa Kentucky North-Carolina Missouri)))
 ; (i-dfs (format-frontier '(California Utah Nevada)) 3)
 ; (i-dfs (format-frontier '(Tennessee Iowa Kentucky North-Carolina Missouri)) 4)
+; (i-dfs (format-frontier '()) 1)
 
 
 ; ------------------------------ Main Function ------------------------------
