@@ -457,6 +457,7 @@
     )
 )
 
+
 ; This function counts how many locations are adjacent
 ;   INPUT: (A*-count-adj '(California Nevada Washington Oregon))
 ;   OUTPUT: 2
@@ -494,6 +495,7 @@
     (append node (list (A*-count-adj (car node))))
 )
 
+
 ; This function takes a node that already has a heuristic value. And uses that
 ; value to create the next heuristic.
 ; 
@@ -520,6 +522,27 @@
 ;   - separate states into regions. higher # states within a region would result
 ;       in a better heuristic?
 
+
+; This function performs an A* search using the following heuristic:
+; 
+;       h(x) = length_of_locations_list - number_of_adjacent_locations
+;       g(x) = cost so far
+;       f(x) = h(x) + g(x)
+; 
+;   INPUT: (A* '(Tennessee Iowa Kentucky North-Carolina Missouri))
+;   OUTPUT: ((North-Carolina Tennessee Kentucky Missouri Iowa) ((1 4) (2 5) (1 5)))
+;   ASSUMES: The list of locations does not have sublists, and has valid entries
 (define (A* locations)
-    (format-frontier locations)
+    (display "Not Complete Yet")
+
+    ; Check base cases: null list, one item list
+
+    ; Check if the head of the open list, is the goal state
+        ; if it is, return this goal state
+
+    ; Get all children and assign heuristics to all children
+
+    ; Sort the states from smallest to largest heuristic value
+
+    ; Recurse on the tail of the list
 )
