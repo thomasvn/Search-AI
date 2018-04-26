@@ -235,23 +235,6 @@
     )
 )
 
-; (display (get-children '((California Utah Nevada) ((1 2)))))
-
-
-; This function will return all children of the current state by returning all
-; possible swaps that can be made as well as its heuristic for reaching the
-; goal state
-;   INPUT: (get-children '((California Nevada) () 1))
-;   OUTPUT: (((Nevada California) (1 2) 1))
-(define (A*-get-children node)
-    (let 
-        ((swaps (all-swaps 1 (length (nth-item 1 node))))
-        (prev-states (nth-item 2 node)))
-        ; Swap all the states, then format the output
-        (format-swapped (swap-all (nth-item 1 node) swaps) swaps prev-states)
-    )
-)
-
 
 ; This function will check if the current node we are at represents the goal state
 ;   INPUT: (is-goal-state? ‘((Alabama Alaska)()))
@@ -459,15 +442,84 @@
 ; (id-dfs '(California Pennsylvania Oregon Nevada Washington))
 
 
+; ------------------------------ A* Helpers ------------------------------
+; This function will return all children of the current state by returning all
+; possible swaps that can be made as well as its heuristic for reaching the
+; goal state
+;   INPUT: (get-children '((California Nevada) () 1))
+;   OUTPUT: (((Nevada California) (1 2) 1))
+(define (A*-get-children node)
+    (let 
+        ((swaps (all-swaps 1 (length (nth-item 1 node))))
+        (prev-states (nth-item 2 node)))
+        ; Swap all the states, then format the output
+        (format-swapped (swap-all (nth-item 1 node) swaps) swaps prev-states)
+    )
+)
+
+; This function counts how many locations are adjacent
+;   INPUT: (A*-count-adj '(California Nevada Washington Oregon))
+;   OUTPUT: 2
+(define (A*-count-adj locations)
+    (cond
+        (
+            ; Base Case: Once we've recursed through all locations, start adding up
+            (null? (cdr locations))
+                0
+        )
+        (
+            ; If items are adjacent, add one to the count
+            (equal? #t (is-adjacent? (car locations) (cadr locations) adjacency-map))
+                (+ (A*-count-adj (cdr locations)) 1)
+        )
+        (
+            ; If items are not adjacent, just propogate the count upwards
+            #t
+                (A*-count-adj (cdr locations))
+        )
+    )
+)
+
+
+; This function takes a normal node, and assigns it a heuristic. The heuristic 
+; I'll be using is as follows:
+; 
+;       h(x) = length_of_locations_list - number_of_adjacent_locations
+;       g(x) = cost so far
+;       f(x) = h(x) + g(x)
+; 
+;   INPUT: (A*-new-node '((California Utah Nevada) ()))
+;   OUTPUT: (((California) () 1))
+(define (A*-new-node node)
+    (append node (list (A*-count-adj (car node))))
+)
+
+; This function takes a node that already has a heuristic value. And uses that
+; value to create the next heuristic.
+; 
+;       h(x) = length_of_locations_list - number_of_adjacent_locations
+;       g(x) = cost so far
+;       f(x) = h(x) + g(x)
+; 
+;   INPUT: (A*-next-node '((California Nevada) ()) 5)
+;   OUTPUT: (((Nevada California) () 6))
+(define (A*-next-node node gx)
+    (append node (list (+ gx (A*-count-adj (car node)))))
+)
+
+
 ; ------------------------------ A* Search ------------------------------
 ; Heuristic for optimistically estimating the number of swaps required to 
 ; complete a solution
+
+; Since the heuristic represents cost, we want to take the smalles heuristic
+; score in front of us
 
 ; Possible Heuristics
 ;   - number of locations that are currently adjacent to one another
 ;   - separate states into regions. higher # states within a region would result
 ;       in a better heuristic?
 
-; (define (A* locations)
-
-; )
+(define (A* locations)
+    (format-frontier locations)
+)
