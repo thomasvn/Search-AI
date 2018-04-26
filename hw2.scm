@@ -396,17 +396,18 @@
                 (car (format-frontier locations))
         )
         (
-            ; Base Case: If we have tried all depths up to the max depth, return false
-            (equal? curr-depth max-depth)
-                #f
-        )
-        (
             ; If there is a dfs solution with this current depth, return solution
             (list? (i-dfs (format-frontier locations) curr-depth))
                 (i-dfs (format-frontier locations) curr-depth)
         )
         (
-            ; If the DFS with the previous depth failed, try next depth
+            ; Base Case: If we have tried all depths up to the max depth, return false
+            (equal? curr-depth max-depth)
+                #f
+        )
+        (
+            ; If the DFS with the previous depth failed, and not yet at max depth,
+            ; recurse to the next depth
             #t
                 (id-dfs-helper locations (+ curr-depth 1) max-depth)
         )
@@ -441,7 +442,7 @@
 
 ; These tests should work
 ; (id-dfs '(California))
-; (id-dfs '(California Oregon))  ; TODO: This did not work
+; (id-dfs '(California Oregon))
 ; (id-dfs '(California Washington Oregon))
 ; (id-dfs '(Idaho California Washington Oregon))
 ; (id-dfs '(Nevada Idaho California Washington Oregon))
