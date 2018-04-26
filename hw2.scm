@@ -204,13 +204,19 @@
     (cond
         (
             ; Base Case: If we've gone through the entire list of swaps, return empty list
-            (null? swaps) 
+            (null? swaps)
                 '()
         )
         (
             ; Pair the element with the swap that was made, then recursively continue
-            #t 
-                (cons (cons (car elements) (list(cons (car swaps) prev))) (format-swapped (cdr elements) (cdr swaps) prev))
+            ; Special case when prev list is null
+            (null? prev)
+                (cons (cons (car elements) (list (cons (car swaps) prev))) (format-swapped (cdr elements) (cdr swaps) prev))
+        )
+        (
+            ; Pair the element with the swap that was made, then recursively continue
+            #t
+                (cons (cons (car elements) (list (append prev (list (car swaps))))) (format-swapped (cdr elements) (cdr swaps) prev))
         )
     )
 )
@@ -218,9 +224,26 @@
 
 ; This function will return all children of the current state by returning all
 ; possible swaps that can be made.
-;   INPUT: (get-children ‘((California Nevada) ()))
-;   OUTPUT: (((Nevada California) (1 2)))
+;   INPUT: (get-children '((California Utah Nevada) ((1 2))))
+;   OUTPUT: (((Nevada Utah California) ((1 3) (1 2))) ((California Nevada Utah) ((2 3) (1 2))) ((Utah California Nevada) ((1 2) (1 2))))
 (define (get-children node)
+    (let 
+        ((swaps (all-swaps 1 (length (nth-item 1 node))))
+        (prev-states (nth-item 2 node)))
+        ; Swap all the states, then format the output
+        (format-swapped (swap-all (nth-item 1 node) swaps) swaps prev-states)
+    )
+)
+
+; (display (get-children '((California Utah Nevada) ((1 2)))))
+
+
+; This function will return all children of the current state by returning all
+; possible swaps that can be made as well as its heuristic for reaching the
+; goal state
+;   INPUT: (get-children '((California Nevada) () 1))
+;   OUTPUT: (((Nevada California) (1 2) 1))
+(define (A*-get-children node)
     (let 
         ((swaps (all-swaps 1 (length (nth-item 1 node))))
         (prev-states (nth-item 2 node)))
@@ -391,7 +414,7 @@
 )
 
 
-; ------------------------------ Main Function ------------------------------
+; ------------------ Iterative Deepening Depth First Search ------------------
 ; This function implements an iterative-deepening depth first search to reach
 ; our goal state. 
 ; 
@@ -404,7 +427,7 @@
 ;   OUTPUT: ((North-Carolina Tennessee Kentucky Missouri Iowa) ((1 4) (2 5) (1 5)))
 ;   ASSUMES: The list of locations does not have sublists, and has valid entries
 (define (id-dfs locations)
-    (id-dfs-helper locations 1 (length locations))
+    (id-dfs-helper locations 1 (- (length locations) 1))
 )
 
 
@@ -418,7 +441,7 @@
 
 ; These tests should work
 ; (id-dfs '(California))
-; (id-dfs '(California Washington))
+; (id-dfs '(California Oregon))  ; TODO: This did not work
 ; (id-dfs '(California Washington Oregon))
 ; (id-dfs '(Idaho California Washington Oregon))
 ; (id-dfs '(Nevada Idaho California Washington Oregon))
@@ -433,3 +456,17 @@
 ; (id-dfs '(California Maine Oregon))
 ; (id-dfs '(California Vermont Oregon Nevada))
 ; (id-dfs '(California Pennsylvania Oregon Nevada Washington))
+
+
+; ------------------------------ A* Search ------------------------------
+; Heuristic for optimistically estimating the number of swaps required to 
+; complete a solution
+
+; Possible Heuristics
+;   - number of locations that are currently adjacent to one another
+;   - separate states into regions. higher # states within a region would result
+;       in a better heuristic?
+
+; (define (A* locations)
+
+; )
